@@ -6,7 +6,7 @@
 const int INF_ROOTS = -1;
 const double ZERO = 1e-10;
 
-void checkZeroThreshold (double* a, double* b, double* c) {
+void CheckZeroThreshold (double* a, double* b, double* c) {
     if (abs(*a) <= ZERO) *a = 0;
     if (abs(*b) <= ZERO) *b = 0;
     if (abs(*c) <= ZERO) *c = 0;
@@ -14,15 +14,15 @@ void checkZeroThreshold (double* a, double* b, double* c) {
 
 int SolveSquare (double a, double b, double c, double* firstRoot, double* secondRoot) {
 
-    assert(isfinite(a));
-    assert(isfinite(b));
-    assert(isfinite(c));
+    assert (isfinite(a));
+    assert (isfinite(b));
+    assert (isfinite(c));
 
-    assert(firstRoot != NULL);
-    assert(secondRoot != NULL);
-    assert(firstRoot != secondRoot);
+    assert (firstRoot != NULL);
+    assert (secondRoot != NULL);
+    assert (firstRoot != secondRoot);
 
-    checkZeroThreshold (&a, &b, &c);
+    CheckZeroThreshold (&a, &b, &c);
 
     if (a) {
         double discriminant = b * b - 4 * a * c;
@@ -47,30 +47,30 @@ int SolveSquare (double a, double b, double c, double* firstRoot, double* second
 }
 
 int main() {
-
-    printf("Enter a, b, c coefficients:\n");
+    printf ("Square equation solver");
+    printf ("Enter a, b, c coefficients:\n");
 
     double a = 0, b = 0, c = 0;
-    scanf("%lg %lg %lg", &a, &b, &c);
+    scanf ("%lg %lg %lg", &a, &b, &c);
 
     double firstRoot = 0, secondRoot = 0;
     int nRoots = SolveSquare(a, b, c, &firstRoot, &secondRoot);
 
-    switch(nRoots) {
+    switch (nRoots) {
         case 0:
-            printf("No roots\n");
+            printf ("No roots\n");
             break;
         case 1:
-            printf("One root: %.4lg\n", firstRoot);
+            printf ("One root: %.4lg\n", firstRoot);
             break;
         case 2:
-            printf("Roots: %.4lg, %.4lg\n", firstRoot, secondRoot);
+            printf ("Roots: %.4lg, %.4lg\n", firstRoot, secondRoot);
             break;
         case INF_ROOTS:
-            printf("Any number is root\n");
+            printf ("Any number is root\n");
             break;
         default:
-            printf("ERROR: main(): nRoots = %d\n", nRoots);
+            printf ("ERROR: main(): nRoots = %d\n", nRoots);
             return 1;
     }
 }
