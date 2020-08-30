@@ -3,78 +3,125 @@
 #include <math.h>
 #include <assert.h>
 
-const int INF_ROOTS = -1;
 const double EPS = 1e-10;
 
-int SquareSolver (double a, double b, double c, double* firstRoot, double* secondRoot) {
-    double discriminant = b * b - 4 * a * c;
+typedef enum nRootFlags {
+    INF_ROOTS = - 1,
+    NO_ROOTS,
+    ONE_ROOT,
+    TWO_ROOTS
+} nRootFlags_t;
 
-    if (discriminant < 0) {
-        return 0;
-    }
+struct SquareEquation {
+    double a = 0,
+           b = 0,
+           c = 0;
 
-    double sqrtDiscr = sqrt(discriminant);
-     *firstRoot = (-b + sqrtDiscr) / (2 * a);
-    *secondRoot = (-b - sqrtDiscr) / (2 * a);
+    double  firstRoot = 0,
+           secondRoot = 0;
 
-    return (discriminant) ? 2 : 1;
-}
+    bool solved = 0;
+    nRootFlags_t nRoots = INF_ROOTS;
+};
 
-int LinearSolver (double b, double c, double* firstRoot) {
-    *firstRoot = -c / b;
-    return 1;
-}
+void SolveSquare   (struct SquareEquation* squareEquation);
+void SquareSolver  (struct SquareEquation* squareEquation);
+void LinearSolver  (struct SquareEquation* squareEquation);
+void TrivialSolver (struct SquareEquation* squareEquation);
 
-int TrivialSolver (double c) {
-    return (fabs(c) > EPS) ? 0 : INF_ROOTS;
-}
+void PrintResult (struct SquareEquation* squareEquation);
+void PrintTitle  ();
 
-int SolveSquare (double a, double b, double c, double* firstRoot, double* secondRoot) {
-
-    assert (isfinite(a));
-    assert (isfinite(b));
-    assert (isfinite(c));
-
-    assert (firstRoot != NULL);
-    assert (secondRoot != NULL);
-    assert (firstRoot != secondRoot);
-
-    if (fabs(a) > EPS) {
-        return SquareSolver (a, b, c, firstRoot, secondRoot);
-    }
-
-    if (fabs(b) > EPS) {
-        return LinearSolver (b, c, firstRoot);
-    }
-
-    return TrivialSolver (c);
-}
+bool isZero (double value);
 
 int main() {
-    printf ("Square equation solver");
+    PrintTitle();
+
+    struct SquareEquation se;
+
     printf ("Enter a, b, c coefficients:\n");
+    scanf ("%lg %lg %lg", &se.a, &se.b, &se.c);
 
-    double a = 0, b = 0, c = 0;
-    scanf ("%lg %lg %lg", &a, &b, &c);
+    SolveSquare (&se);
 
-    double firstRoot = 0, secondRoot = 0;
-    int nRoots = SolveSquare (a, b, c, &firstRoot, &secondRoot);
+    PrintResult (&se);
+}
 
-    switch (nRoots) {
-        case 0:
+void SolveSquare (struct SquareEquation* se) {
+
+    assert (isfinite(se -> a));
+    assert (isfinite(se -> b));
+    assert (isfinite(se -> c));
+
+    if (!isZero(se -> a)) {
+        SquareSolver (se);
+    }
+
+    else if (!isZero(se -> b)) {
+        LinearSolver (se);
+    }
+
+    else {
+        TrivialSolver (se);
+    }
+
+    se -> solved = true;
+}
+
+void SquareSolver (struct SquareEquation* se) {
+    double discriminant = (se -> b) * (se -> b) - 4 * (se -> a) * (se -> c);
+
+    if (discriminant < 0) {
+        se -> nRoots = NO_ROOTS;
+    }
+
+    else if (isZero(discriminant)) {
+        (se -> firstRoot) = (se -> secondRoot) = -(se -> b) / (2 * (se -> a));
+        se -> nRoots = ONE_ROOT;
+    }
+
+    else {
+        double sqrtDiscr = sqrt(discriminant);
+         se -> firstRoot = (-(se -> b) + sqrtDiscr) / (2 * (se -> a));
+        se -> secondRoot = (-(se -> b) - sqrtDiscr) / (2 * (se -> a));
+        se -> nRoots = TWO_ROOTS;
+    }
+}
+
+void LinearSolver (struct SquareEquation* se) {
+    se -> firstRoot = (isZero(se -> c)) ? 0 : -(se -> c) / (se -> b);
+    se -> nRoots = ONE_ROOT;
+}
+
+void TrivialSolver (struct SquareEquation* se) {
+    se -> nRoots = (isZero(se -> c)) ? INF_ROOTS : NO_ROOTS;
+}
+
+bool isZero(double value) {
+    return fabs(value) < EPS;
+}
+
+void PrintResult (struct SquareEquation* se) {
+    if (!(se -> solved)) {
+        printf ("Sorry, the equation is not solved.\n");
+        return;
+    }
+    switch (se -> nRoots) {
+        case NO_ROOTS:
             printf ("No roots\n");
             break;
-        case 1:
-            printf ("One root: %.4lg\n", firstRoot);
+        case ONE_ROOT:
+            printf ("One root: %.4lg\n", se -> firstRoot);
             break;
-        case 2:
-            printf ("Roots: %.4lg, %.4lg\n", firstRoot, secondRoot);
+        case TWO_ROOTS:
+            printf ("Roots: %.4lg, %.4lg\n", se -> firstRoot, se -> secondRoot);
             break;
         case INF_ROOTS:
             printf ("Any number is root\n");
             break;
-        default:
-            printf ("ERROR: main(): nRoots = %d\n", nRoots);
-            return 1;
     }
+}
+
+void PrintTitle() {
+    printf ("Square equation solver");
 }
